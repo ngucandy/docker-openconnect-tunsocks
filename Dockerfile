@@ -1,28 +1,24 @@
-# base source builder ------------------
+#----- base source builder ----------------------------------------------------
 FROM debian:stable-slim as base-builder
 
-MAINTAINER Andy Nguyen <anguyen@computer.org>
+LABEL mainttiner="anguyen@computer.org"
 
 # gnu build system
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         build-essential autoconf automake libtool pkg-config \
-#        wget git ca-certificates
         curl git ca-certificates
 
-# openconnect source buidler -----------
-
+#----- openconnect source buidler ---------------------------------------------
 FROM base-builder as openconnect-builder
-
-MAINTAINER Andy Nguyen <anguyen@computer.org>
 
 WORKDIR /build
 
 ARG OPENCONNECT_VERSION
 ARG VPNC_SCRIPTS_DATE
 
-ENV OPENCONNECT_VERSION=${OPENCONNECT_VERSION:-8.09}
-ENV VPNC_SCRIPTS_DATE=${VPNC_SCRIPTS_DATE:-20200226}
+ENV OPENCONNECT_VERSION=${OPENCONNECT_VERSION:-8.10}
+ENV VPNC_SCRIPTS_DATE=${VPNC_SCRIPTS_DATE:-20200930}
 
 # openconnect deps
 RUN apt-get install -y --no-install-recommends \
@@ -54,11 +50,9 @@ WORKDIR /build
 
 RUN rm -rf openconnect-${OPENCONNECT_VERSION}
 
-# tunsocks source buidler --------------
+#----- tunsocks source buidler ------------------------------------------------
 
 FROM base-builder as tunsocks-builder
-
-MAINTAINER Andy Nguyen <anguyen@computer.org>
 
 WORKDIR /build
 
@@ -96,11 +90,9 @@ WORKDIR /build
 
 RUN rm -rf tunsocks
 
-# minimal image ------------------------
+#----- minimal image ----------------------------------------------------------
 
 FROM debian:stable-slim
-
-MAINTAINER Andy Nguyen <anguyen@computer.org>
 
 # openconnect deps
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -110,11 +102,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     mkdir /etc/vpnc
 
 COPY --from=openconnect-builder /build/openconnect.tar.gz /
-
 COPY --from=openconnect-builder /build/vpnc-script /etc/vpnc/vpnc-script
-
 COPY --from=tunsocks-builder /build/tunsocks.tar.gz /
-
 COPY docker-entrypoint.sh /
 
 RUN tar -xzf openconnect.tar.gz && \
@@ -126,7 +115,7 @@ RUN tar -xzf openconnect.tar.gz && \
     rm /etc/ssl/openssl.cnf && \
     echo 'hosts: files dns' > /etc/nsswitch.conf
 
-EXPOSE 80/tcp
+EXPOSE 8080/tcp
 EXPOSE 9000/tcp
 EXPOSE 22222/udp
 
