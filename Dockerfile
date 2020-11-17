@@ -1,7 +1,7 @@
 #----- base source builder ----------------------------------------------------
 FROM debian:stable-slim as base-builder
 
-LABEL mainttiner="anguyen@computer.org"
+LABEL maintainer="anguyen@computer.org"
 
 # gnu build system
 RUN apt-get update && \
@@ -51,7 +51,6 @@ WORKDIR /build
 RUN rm -rf openconnect-${OPENCONNECT_VERSION}
 
 #----- tunsocks source buidler ------------------------------------------------
-
 FROM base-builder as tunsocks-builder
 
 WORKDIR /build
@@ -91,7 +90,6 @@ WORKDIR /build
 RUN rm -rf tunsocks
 
 #----- minimal image ----------------------------------------------------------
-
 FROM debian:stable-slim
 
 # openconnect deps
